@@ -2,16 +2,125 @@
 Jose Miguel Laura Callisaya
 Miguel Angel Lujan Llampa
 -->>
-<!Doctype html>
+<!doctype html>
 <html lang="es">
-    <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        
-    </body>
-    <script>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Todo List</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
 
+  <body>
+    <div class="contenedor">
+      <h1>Lista de tareas</h1>
+
+      <p>Ingrese la descripción de la tarea</p>
+      <input type="text" id="descripcion" placeholder="Descripción" />
+
+      <p>Ingrese la fecha de la tarea</p>
+      <input type="date" id="fecha" />
+
+      <button onclick="agregarTarea()">Agregar tarea</button>
+
+      <ul id="listaTareas"></ul>
+
+      <p id="mensaje"></p>
+    </div>
+
+    <script>
+      let tareas = JSON.parse(localStorage.getItem("tareas")) || [];
+
+      function guardarTareas() {
+        localStorage.setItem("tareas", JSON.stringify(tareas));
+      }
+
+      function mostrarMensaje(texto) {
+        document.getElementById("mensaje").innerText = texto;
+      }
+
+      function mostrarTareas() {
+        let lista = document.getElementById("listaTareas");
+        lista.innerHTML = "";
+
+        tareas.forEach((tarea, index) => {
+          let li = document.createElement("li");
+
+          let descripcion = document.createElement("span");
+          descripcion.innerText = tarea.descripcion;
+          descripcion.className = "texto-tarea";
+
+          if (tarea.completada) {
+            descripcion.style.textDecoration = "line-through";
+          }
+
+          let fecha = document.createElement("span");
+          fecha.innerText = tarea.fecha;
+          fecha.className = "fecha-tarea";
+
+          let checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = tarea.completada;
+
+          checkbox.onchange = function () {
+            tareas[index].completada = checkbox.checked;
+            guardarTareas();
+            mostrarTareas();
+          };
+
+          let botonEliminar = document.createElement("button");
+          botonEliminar.innerText = "Eliminar";
+          botonEliminar.className = "boton-eliminar";
+
+          botonEliminar.onclick = function () {
+            tareas.splice(index, 1);
+            guardarTareas();
+            mostrarTareas();
+            mostrarMensaje("Tarea eliminada");
+          };
+
+          let filaSuperior = document.createElement("div");
+          filaSuperior.className = "fila-superior";
+          filaSuperior.appendChild(descripcion);
+          filaSuperior.appendChild(checkbox);
+
+          let filaInferior = document.createElement("div");
+          filaInferior.className = "fila-inferior";
+          filaInferior.appendChild(fecha);
+          filaInferior.appendChild(botonEliminar);
+
+          li.appendChild(filaSuperior);
+          li.appendChild(filaInferior);
+
+          lista.appendChild(li);
+        });
+      }
+
+      function agregarTarea() {
+        let descripcion = document.getElementById("descripcion").value.trim();
+        let fecha = document.getElementById("fecha").value;
+
+        if (descripcion === "" || fecha === "") {
+          mostrarMensaje("Debe llenar descripción y fecha");
+          return;
+        }
+
+        tareas.push({
+          descripcion: descripcion,
+          fecha: fecha,
+          completada: false,
+        });
+
+        guardarTareas();
+        mostrarTareas();
+
+        document.getElementById("descripcion").value = "";
+        document.getElementById("fecha").value = "";
+
+        mostrarMensaje("Tarea agregada");
+      }
+
+      mostrarTareas();
     </script>
+  </body>
 </html>
